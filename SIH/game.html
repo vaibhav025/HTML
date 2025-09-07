@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Disaster Management Quiz</title>
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Disaster%20Management%20Quiz%22%2C%22short_name%22%3A%22DMQuiz%22%2C%22description%22%3A%22Learn%20disaster%20preparation%20through%20text-based%20quizzes%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2387CEEB%22%2C%22theme_color%22%3A%22%234682B4%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bcharset%3Dutf-8%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20192%20192'%3E%3Cpath%20fill%3D'%23FF4500'%20d%3D'M96%2010c-44.2%200-80%2035.8-80%2080%200%2044.2%2035.8%2080%2080%2080s80-35.8%2080-80c0-44.2-35.8-80-80-80zm0%20120c-22.1%200-40-17.9-40-40s17.9-40%2040-40%2040%2017.9%2040%2040-17.9%2040-40%2040z'/%3E%3Cpath%20fill%3D'%23007BFF'%20d%3D'M96%2040c-11.05%200-20%208.95-20%2020s8.95%2020%2020%2020%2020-8.95%2020-20-8.95-20-20-20z'/%3E%3Cpath%20fill%3D'%238B4513'%20d%3D'M96%2080c-11.05%200-20%208.95-20%2020v40c0%2011.05%208.95%2020%2020%2020s20-8.95%2020-20V100c0-11.05-8.95-20-20-20z'/%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+    <meta name="theme-color" content="#4682B4">
+    <style>
+        body { margin: 0; padding: 0; background: linear-gradient(to bottom, #87CEEB, #4682B4); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; color: white; font-size: 18px; }
+        .app-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; max-width: 600px; margin: 0 auto; }
+        .btn { transition: all 0.3s ease; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 5px 0; width: 100%; max-width: 200px; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn:active { transform: scale(0.95); }
+        .option.btn.correct { background-color: #4CAF50 !important; color: rgb(255, 255, 255); }
+        .option.btn.incorrect { background-color: #da3a2e !important; color: white; }
+        .scenario { font-size: 16px; text-align: center; margin: 15px 0; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .level-info { background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
+        .quiz-section { background: white; color: #333; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 100%; margin-top: 10px; }
+        .stats { display: flex; justify-content: space-around; margin: 10px 0; font-size: 14px; flex-wrap: wrap; }
+        .install-btn { position: fixed; bottom: 20px; right: 20px; background: #4CAF50; color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; display: none; align-items: center; justify-content: center; cursor: pointer; }
+        @media (max-width: 600px) { .app-container { padding: 10px; } .quiz-section { padding: 15px; } .btn { font-size: 14px; } }
+        .option.btn { background: #f0f0f0; color: #333; text-align: left; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 10px; font-size: 28px;">Disaster Management Quiz</h1>
+        <p style="text-align: center; margin-bottom: 20px; font-size: 16px; color: white;">Master disaster prep through text-based quizzes. Install for offline play!</p>
+        <div class="quiz-section">
+            <div id="scenario" class="scenario">No scenario loaded</div>
+            <div id="timer" style="text-align: center; font-size: 24px; font-weight: bold; color: #333;">Time: 40</div>
+        </div>
+        <div class="quiz-section" style="flex-grow: 1;">
+            <div id="levelInfo" class="level-info"></div>
+            <h2 style="margin-bottom: 10px; font-size: 20px;">Question</h2>
+            <p id="questionText" style="margin-bottom: 15px; color: #333;">Loading question...</p>
+            <div id="options" style="margin-bottom: 15px;"></div>
+            <div id="feedback" style="margin-bottom: 10px; text-align: center; font-weight: bold; color: #333;"></div>
+            <div class="stats">
+                <div>Score: <span id="score">0</span></div>
+                <div>Lives Saved: <span id="lives">0</span></div>
+                <div>Question: <span id="currentQ">1</span> / <span id="totalQ">5</span></div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button id="nextBtn" class="btn" style="background: #2196F3; color: white; display: none;">Next Question</button>
+                <button id="nextLevelBtn" class="btn" style="background: #4CAF50; color: rgb(255, 255, 255); display: none;">Next Level</button>
+                <button id="restartBtn" class="btn" style="background: #1a98ff; color: rgb(255, 255, 255);">Restart</button>
+            </div>
+        </div>
+    </div>
+    <button id="installBtn" class="install-btn">+</button>
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'flex';
+        });
+        document.getElementById('installBtn').addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') console.log('User accepted the install prompt');
+                deferredPrompt = null;
+            });
+        });
+
+        // Service Worker Registration (Embedded)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript;charset=utf-8,' +
+                encodeURIComponent(`
+                    self.addEventListener('install', event => {
+                        console.log('Service Worker installing.');
+                    });
+                    self.addEventListener('activate', event => {
+                        console.log('Service Worker activating.');
+                    });
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request).then(response => {
+                                return response || fetch(event.request);
+                            })
+                        );
+                    });
+                `)
+            ).then(registration => {
+                console.log('Service Worker registered');
+            }).catch(error => {
+                console.log('Service Worker registration failed');
+            });
+        }
+
+        // Quiz Logic
+        const allQuestions = {
+            1: [ // Beginner
+                { q: "During a flood, what is the first thing you should do?", options: ["Run to collect valuables", "Move to higher ground immediately", "Wait for help", "Ignore warnings"], correct: 1, scenario: "flood", points: 10 },
+                { q: "What should you have in an emergency kit for all disasters?", options: ["Water and food for 3 days", "Party decorations", "Luxury items", "Only cash"], correct: 0, scenario: "home", points: 15 },
+                { q: "If a fire starts in your kitchen, you should:", options: ["Use water to put it out", "Smother it with a wet towel or fire blanket", "Run away", "Fan it to spread"], correct: 1, scenario: "fire", points: 15 },
+                { q: "During an earthquake, you should get under a sturdy _____ immediately.", options: ["Chair", "Table or desk", "Window", "Doorway"], correct: 1, scenario: "quake", points: 15 },
+                { q: "After a disaster, why is it important to check utilities?", options: ["To turn them on for comfort", "To ensure no gas leaks or electrical hazards", "To use more power", "To ignore structural damage"], correct: 1, scenario: "home", points: 10 },
+                { q: "In a tsunami warning, where should you go?", options: ["To the beach", "To higher ground inland", "Stay in a boat", "Watch TV"], correct: 1, scenario: "flood", points: 15 },
+                { q: "What is the best way to prepare for a wildfire?", options: ["Light a small fire for practice", "Create a defensible space around your home", "Store gasoline inside", "Ignore evacuation plans"], correct: 1, scenario: "fire", points: 10 },
+                { q: "During an earthquake, if you're indoors, what should you not do?", options: ["Crawl under furniture", "Stand in a doorway", "Use elevators", "Cover your head"], correct: 2, scenario: "quake", points: 10 },
+                { q: "What emergency number should you call in the US for disasters?", options: ["123", "911", "555", "000"], correct: 1, scenario: "person", points: 5 },
+                { q: "After a disaster, what is a key priority for safety?", options: ["Clean up flooding with electricity on", "Secure pets and family", "Post on social media immediately", "Drive to see damage"], correct: 1, scenario: "quake", points: 15 }
+            ],
+            2: [ // Intermediate
+                { q: "What should you do in a tornado warning?", options: ["Stand in an open field", "Go to the lowest floor", "Seek shelter in a windowless room on the lowest floor", "Run outdoors"], correct: 2, scenario: "tornado", points: 20 },
+                { q: "During a volcanic eruption, avoid areas downwind because of:", options: ["Strong winds", "Ash inhalation and lava flows", "Good views", "Nothing"], correct: 1, scenario: "volcano", points: 20 },
+                { q: "In hurricane evacuation, should you follow evacuation routes only?", options: ["No, use shortcuts", "Yes, to avoid blocked roads", "Drive through floodwater", "Stay put"], correct: 1, scenario: "flood", points: 20 },
+                { q: "Why prepare a family communication plan?", options: ["To text often", "To designate meeting points if separated", "To ignore devices", "Just in case"], correct: 1, scenario: "quake", points: 15 },
+                { q: "What is carbon monoxide poisoning risk in disasters?", options: ["From candles", "From generators or heaters inside", "Not an issue", "Only outside"], correct: 1, scenario: "fire", points: 15 },
+                { q: "In blizzard conditions, travel only if:", options: ["Emergent", "You have winter tires and emergency kit", "You miss deadlines", "Indoors is boring"], correct: 1, scenario: "flood", points: 20 } // Adapted flood for snow
+            ],
+            3: [ // Advanced
+                { q: "How to shield yourself from heat waves?", options: ["Stay in sun", "Hydrate, stay indoors, use fans", "Run marathons", "Ignore"], correct: 1, scenario: "home", points: 25 },
+                { q: "Biological hazard response includes:", options: ["Inoculation programs", "Self-isolate if exposed", "Party with friends", "Nothing"], correct: 1, scenario: "person", points: 25 },
+                { q: "Cyber attack during disaster? Protect by:", options: ["Click all links", "Use strong passwords, multi-factor", "Share info freely", "None needed"], correct: 1, scenario: "quake", points: 25 },
+                { q: "In chemical spill, what to do?", options: ["Approach spill", "Evacuate upwind, seek medical", "Swim in it", "Deny existence"], correct: 1, scenario: "fire", points: 25 }, // Fire for hazard adaptation
+                { q: "FEMA recommends supplies for how many people?", options: ["0", "Your household", "Strangers", "100"], correct: 1, scenario: "home", points: 20 }
+            ]
+        };
+        let levelsComplete = 0;
+        let currentLevel = 1;
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 0;
+        let totalQuestionsPerLevel = 5; // 5 questions per level
+        let timer = 30;
+        let timerInterval;
+        let answered = false;
+
+        const levelEl = document.getElementById('levelInfo');
+        const questionEl = document.getElementById('questionText');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const nextBtn = document.getElementById('nextBtn');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const currentQEl = document.getElementById('currentQ');
+        const totalQEl = document.getElementById('totalQ');
+        const timerEl = document.getElementById('timer');
+        const scenarioEl = document.getElementById('scenario');
+
+        function randomizeQuestions() {
+            questions = JSON.parse(JSON.stringify(allQuestions[currentLevel])); // Deep copy
+            // Shuffle questions
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+            questions = questions.slice(0, totalQuestionsPerLevel); // Take first 5
+        }
+
+        function describeScenario(scenario) {
+            const descriptions = {
+                flood: "Scenario: A flood is rising rapidly. Water is covering streets, and your area is at risk of inundation.",
+                fire: "Scenario: A fire has started in a building nearby. Smoke is visible, and flames are spreading.",
+                quake: "Scenario: An earthquake is occurring. The ground is shaking, and buildings are cracking.",
+                home: "Scenario: You are preparing at home for potential disasters. Focus on supplies and safety plans.",
+                person: "Scenario: You are assisting someone during a disaster event.",
+                tornado: "Scenario: A tornado warning is in effect. Strong winds and rotation are approaching.",
+                volcano: "Scenario: A volcano is erupting nearby. Ash and lava pose imminent threats."
+            };
+            return descriptions[scenario] || "No scenario description available.";
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                checkLevelCompletion();
+                return;
+            }
+            const q = questions[currentQuestionIndex];
+            questionEl.textContent = q.q;
+            optionsEl.innerHTML = '';
+            for (let i = 0; i < q.options.length; i++) {
+                const btn = document.createElement('button');
+                btn.classList.add('btn', 'option');
+                btn.textContent = q.options[i];
+                btn.onclick = () => checkAnswer(i);
+                optionsEl.appendChild(btn);
+            }
+            feedbackEl.textContent = '';
+            nextBtn.style.display = 'none';
+            answered = false;
+            scenarioEl.textContent = describeScenario(q.scenario);
+            resetTimer();
+            currentQEl.textContent = currentQuestionIndex + 1;
+        }
+
+        function checkAnswer(selected) {
+            if (answered) return;
+            answered = true;
+            clearInterval(timerInterval);
+            const q = questions[currentQuestionIndex];
+            const buttons = document.querySelectorAll('.option');
+            buttons.forEach(btn => { btn.disabled = true; btn.style.cursor = 'not-allowed'; });
+            if (selected === q.correct) {
+                buttons[selected].classList.add('correct');
+                feedbackEl.textContent = 'Correct! +' + q.points + ' points';
+                score += q.points;
+                if (['flood', 'quake', 'tornado', 'volcano'].includes(q.scenario)) lives += Math.floor(q.points / 10); // Bonus lives for physical disasters
+            } else {
+                buttons[selected].classList.add('incorrect');
+                feedbackEl.textContent = 'Incorrect. The correct answer is: ' + q.options[q.correct];
+            }
+            updateUI();
+            nextBtn.style.display = 'block';
+        }
+
+        function updateUI() {
+            scoreEl.textContent = score;
+            livesEl.textContent = lives;
+            levelEl.innerHTML = `Level ${currentLevel}: ${currentLevel === 1 ? 'Beginner' : currentLevel === 2 ? 'Intermediate' : 'Advanced'}<br>Score needed to advance: ${currentLevel * 50}`;
+            totalQEl.textContent = questions.length;
+        }
+
+        function resetTimer() {
+            timer = 40;
+            timerEl.textContent = timer;
+            timerInterval = setInterval(() => {
+                if (timer > 0) {
+                    timer--;
+                    timerEl.textContent = timer;
+                } else {
+                    clearInterval(timerInterval);
+                    checkAnswer(-1); // Auto-submit if time runs out
+                }
+            }, 1000);
+        }
+
+        function checkLevelCompletion() {
+            const requiredScore = currentLevel * 50; // Arbitrary threshold: 50 for L1, 100 for L2, 150 for L3
+            if (score >= requiredScore && currentLevel < 3) {
+                levelsComplete++;
+                nextLevelBtn.style.display = 'block';
+                feedbackEl.innerHTML = `Level ${currentLevel} Complete Score!: ${score}/${requiredScore}. Proceed to next level?`;
+            } else if (currentLevel === 3 && score >= requiredScore) {
+                levelsComplete++;
+                feedbackEl.innerHTML = `Quiz Complete! Total Score: ${score} points<br>Lives Saved: ${lives}<br>Well Done!`;
+            } else {
+                feedbackEl.innerHTML = `Level ${currentLevel} Failed! Final Score: ${score}/${requiredScore}<br>You reached the end.`;
+            }
+            nextBtn.style.display = 'none';
+            timerEl.textContent = '';
+        }
+
+        nextBtn.onclick = () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        };
+
+        nextLevelBtn.onclick = () => {
+            currentLevel++;
+            currentQuestionIndex = 0;
+            randomizeQuestions();
+            updateUI();
+            nextLevelBtn.style.display = 'none';
+            feedbackEl.textContent = '';
+            loadQuestion();
+        };
+
+        restartBtn.onclick = () => {
+            currentLevel = 1;
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 0;
+            levelsComplete = 0;
+            randomizeQuestions();
+            updateUI();
+            nextLevelBtn.style.display = 'none';
+            feedbackEl.textContent = '';
+            loadQuestion();
+        };
+
+        // Initialize
+        randomizeQuestions();
+        updateUI();
+        loadQuestion(); // Start the quiz
+    </script>
+</body>
+</html>
+</content>
+</create_file>
